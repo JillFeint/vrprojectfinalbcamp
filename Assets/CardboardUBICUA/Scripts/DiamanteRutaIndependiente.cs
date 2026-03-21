@@ -9,7 +9,7 @@ public class DiamanteRutaIndependiente : MonoBehaviour
     void Start()
     {
         // Buscamos al Player (1) que aparece en tu jerarquía
-        GameObject player = GameObject.Find("Player (1)");
+        GameObject player = GameObject.Find("Player");
         if (player != null) playerTransform = player.transform;
     }
 
@@ -26,7 +26,7 @@ public class DiamanteRutaIndependiente : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("No se encontró al objeto 'Player (1)'. Revisa el nombre.");
+            Debug.LogWarning("No se encontró al objeto 'Player'. Revisa el nombre.");
         }
     }
 
