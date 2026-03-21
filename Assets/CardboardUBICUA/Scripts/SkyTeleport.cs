@@ -1,11 +1,13 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class SkyTeleport : MonoBehaviour
 {
     [Header("Configuración de Teleport")]
-    public Transform puntoDestino;
-    public Transform jugador;
+    public string nombreEscenaPrincipal = "1-Escena Principal";
+    public Transform puntoDestino;      // Arrastra aquí el "PuntoInicio" de la Escena 1
+    public Transform jugador;            // Arrastra aquí tu "Player"
     public float tiempoRequerido = 10f;
 
     [Header("UI para Cardboard")]
@@ -13,8 +15,6 @@ public class SkyTeleport : MonoBehaviour
     public GameObject objetoCanvas;
 
     [Header("Ajuste de Límite")]
-    // Según tu captura, el límite es 315. 
-    // Lo pondremos en 320 para que se active justo antes de llegar al tope.
     public float limiteMiradaArriba = 320f;
 
     [Header("Estado Actual")]
@@ -32,11 +32,14 @@ public class SkyTeleport : MonoBehaviour
 
     void Update()
     {
-        if (camaraPrincipal == null) return;
+        if (camaraPrincipal == null)
+        {
+            if (Camera.main != null) camaraPrincipal = Camera.main.transform;
+            return;
+        }
 
         float anguloX = camaraPrincipal.localEulerAngles.x;
 
-        // Si el ángulo está entre 270 (mirar recto arriba) y 320 (tu límite)
         if (anguloX > 270f && anguloX <= limiteMiradaArriba)
         {
             if (objetoCanvas != null && !objetoCanvas.activeSelf)
@@ -46,48 +49,56 @@ public class SkyTeleport : MonoBehaviour
             float restante = tiempoRequerido - cronometro;
 
             if (textoContador != null)
-                textoContador.text = "Regresando en: " + restante.ToString("F1") + "s";
+                textoContador.text = "Regresando al Inicio en: " + restante.ToString("F1") + "s";
 
             if (cronometro >= tiempoRequerido)
             {
-                EjecutarTeletransporte();
+                DecidirDestino();
             }
         }
         else
         {
-            // REINICIO: Si bajas la mirada de ese punto, el tiempo vuelve a 0 y la UI se borra.
             cronometro = 0f;
             if (objetoCanvas != null && objetoCanvas.activeSelf)
                 objetoCanvas.SetActive(false);
         }
     }
 
-    void EjecutarTeletransporte()
+    void DecidirDestino()
+    {
+        cronometro = 0f;
+        if (objetoCanvas != null) objetoCanvas.SetActive(false);
+
+        // REGLA DE ORO:
+        // Si la escena actual es la Principal, solo nos movemos de posición.
+        // Si NO es la principal, cargamos la escena desde cero.
+        if (SceneManager.GetActiveScene().name == nombreEscenaPrincipal)
+        {
+            MoverJugadorAPuntoUno();
+        }
+        else
+        {
+            SceneManager.LoadScene(nombreEscenaPrincipal);
+        }
+    }
+
+    void MoverJugadorAPuntoUno()
     {
         if (puntoDestino != null && jugador != null)
         {
-            // 1. Buscamos el controlador para "limpiarlo"
             CharacterController cc = jugador.GetComponent<CharacterController>();
 
-            // 2. Apagamos para permitir el salto de posición
+            // Apagamos el controlador para evitar bloqueos
             if (cc != null) cc.enabled = false;
 
-            // 3. Movemos al jugador
             jugador.position = puntoDestino.position;
-            // Importante: Alinear también la rotación para que el Gaze mire al frente
             jugador.rotation = puntoDestino.rotation;
 
-            // 4. Encendemos de nuevo
+            // Encendemos y sincronizamos
             if (cc != null) cc.enabled = true;
-
-            // 5. Reiniciamos el sistema de Gaze por si se quedó trabado
-            // Esto refresca la detección de colisiones del puntero
             Physics.SyncTransforms();
 
-            cronometro = 0f;
-            if (objetoCanvas != null) objetoCanvas.SetActive(false);
-
-            Debug.Log("Teletransporte de regreso completado. Nav diamantina habilitada.");
+            Debug.Log("Teletransportado al Punto 1 dentro de la misma escena.");
         }
     }
 }
