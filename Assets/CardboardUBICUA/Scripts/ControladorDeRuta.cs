@@ -37,6 +37,8 @@ public class ControladorDeRuta : MonoBehaviour
             {
                 Vector3 pos = inicio + (dir * (j * distanciaEntrePuntos));
 
+                pos.y -= 1.6f;
+
                 // Aplicar offset para que no choque con otras rutas
                 Vector3 derecha = Vector3.Cross(dir, Vector3.up).normalized;
                 pos += derecha * separacionLateral;

@@ -8,26 +8,31 @@ public class DiamanteRutaIndependiente : MonoBehaviour
 
     void Start()
     {
-        // Busca al jugador automáticamente para no tener que arrastrarlo manualmente
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player == null) player = GameObject.Find("Player");
-
+        // Buscamos al Player (1) que aparece en tu jerarquía
+        GameObject player = GameObject.Find("Player (1)");
         if (player != null) playerTransform = player.transform;
     }
 
-    // Estas funciones las llama tu mirada (Gazer)
-    public void OnPointerClickXR()
+    // Estas versiones aceptan CUALQUIER llamada del puntero, con o sin datos
+    public void OnPointerClickXR() { Teletransportar(); }
+    public void OnPointerClickXR(GameObject data) { Teletransportar(); }
+
+    private void Teletransportar()
     {
         if (playerTransform != null)
         {
-            // Te mueve a la posición del diamante (manteniendo tu altura de ojos)
             playerTransform.position = new Vector3(transform.position.x, playerTransform.position.y, transform.position.z);
-
-            // Avisa que ya fue usado para desaparecer el rastro
             OnUsed.Invoke();
+        }
+        else
+        {
+            Debug.LogWarning("No se encontró al objeto 'Player (1)'. Revisa el nombre.");
         }
     }
 
-    public void OnPointerEnterXR() { /* Aquí podrías poner un sonido */ }
-    public void OnPointerExitXR() { /* O cambiar el tamaño al mirar */ }
+    // Funciones vacías para absorber los mensajes de error de la consola
+    public void OnPointerEnterXR() { }
+    public void OnPointerEnterXR(GameObject data) { }
+    public void OnPointerExitXR() { }
+    public void OnPointerExitXR(GameObject data) { }
 }
